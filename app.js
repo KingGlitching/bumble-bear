@@ -907,7 +907,7 @@
         const info = await window.BumbleKnow.about(topic, readLevel() <= 2 ? 1 : readLevel() <= 4 ? 2 : 3);
         if (!alive(id)) return;
         if (info) {
-          const img = /^https:\/\/upload\.wikimedia\.org\//.test(info.image) ? `<img class="cover" alt="" src="${LN.esc(info.image)}">` : '<div class="big">🔎</div>';
+          const img = /^https:\/\/(upload|thumb)\.wikimedia\.org\//.test(info.image) ? `<img class="cover" alt="" src="${LN.esc(info.image)}">` : '<div class="big">🔎</div>';
           showCard(`${img}<div class="word" style="font-size:22px;text-transform:none">${LN.esc(info.title)}</div>`);
           card.querySelector('.tap')?.remove();
           return say(info.text);
