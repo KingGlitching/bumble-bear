@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Bumble Bear</title>
+<meta name="theme-color" content="#FFE7B3">
+<meta name="description" content="Bumble the talking bear — talk, play and learn for little ones.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bumble">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title">Bumble <span>Bear</span></div>
+    <button id="gear" class="gear" aria-label="Grown-up settings (press and hold)">⚙️</button>
+  </header>
+
+  <div id="bubble" class="bubble" aria-live="polite">Hi! I'm Bumble!</div>
+
+  <main id="scene">
+    <div id="card" class="card hidden" aria-live="polite"></div>
+    <button id="cardClose" class="card-close hidden" aria-label="Close game">✕</button>
+
+    <div id="bearWrap" class="bear-wrap">
+      <div class="listen-ring"></div>
+      <svg id="bear" class="bear" viewBox="0 0 300 340" aria-label="Bumble the bear" role="img">
+        <!-- feet -->
+        <ellipse class="fur" cx="105" cy="322" rx="34" ry="16"/>
+        <ellipse class="fur" cx="195" cy="322" rx="34" ry="16"/>
+        <!-- body -->
+        <ellipse class="fur" cx="150" cy="268" rx="92" ry="66"/>
+        <ellipse class="light" cx="150" cy="280" rx="56" ry="44"/>
+        <!-- arms -->
+        <g class="arm arm-l"><ellipse class="fur" cx="70" cy="262" rx="26" ry="42" transform="rotate(20 70 262)"/></g>
+        <g class="arm arm-r"><ellipse class="fur" cx="230" cy="262" rx="26" ry="42" transform="rotate(-20 230 262)"/></g>
+        <!-- ears -->
+        <g class="ears">
+          <circle class="fur ear-l" cx="76" cy="60" r="34"/>
+          <circle class="fur ear-r" cx="224" cy="60" r="34"/>
+          <circle class="inner" cx="76" cy="60" r="19"/>
+          <circle class="inner" cx="224" cy="60" r="19"/>
+        </g>
+        <!-- head -->
+        <g class="head">
+          <circle class="fur" cx="150" cy="132" r="96"/>
+          <!-- tuft -->
+          <path class="fur" d="M138 42 Q144 22 152 38 Q158 20 164 42 Z"/>
+          <circle class="cheek" cx="92" cy="168" r="15"/>
+          <circle class="cheek" cx="208" cy="168" r="15"/>
+          <ellipse class="light" cx="150" cy="176" rx="54" ry="40"/>
+          <g class="eyes-open">
+            <ellipse class="eye dark" cx="112" cy="126" rx="12" ry="15"/>
+            <ellipse class="eye dark" cx="188" cy="126" rx="12" ry="15"/>
+            <circle class="shine" cx="116" cy="120" r="4.5"/>
+            <circle class="shine" cx="192" cy="120" r="4.5"/>
+          </g>
+          <g class="eyes-closed">
+            <path d="M99 128 Q112 138 125 128" class="stroke"/>
+            <path d="M175 128 Q188 138 201 128" class="stroke"/>
+          </g>
+          <ellipse class="dark" cx="150" cy="160" rx="19" ry="13"/>
+          <ellipse class="shine" cx="144" cy="155" rx="6" ry="3.5"/>
+          <path class="smile stroke" d="M126 182 Q150 204 174 182"/>
+          <g class="mouth-open">
+            <ellipse class="dark" cx="150" cy="190" rx="16" ry="13"/>
+            <ellipse class="tongue" cx="150" cy="197" rx="9" ry="5"/>
+          </g>
+        </g>
+        <!-- bow -->
+        <g class="bow">
+          <path class="red" d="M150 232 L116 214 L116 250 Z"/>
+          <path class="red" d="M150 232 L184 214 L184 250 Z"/>
+          <circle class="red-dark" cx="150" cy="232" r="10"/>
+        </g>
+        <!-- paws for peekaboo -->
+        <g class="paws">
+          <circle class="fur" cx="112" cy="126" r="30"/>
+          <circle class="fur" cx="188" cy="126" r="30"/>
+          <circle class="inner" cx="112" cy="132" r="13"/>
+          <circle class="inner" cx="188" cy="132" r="13"/>
+        </g>
+      </svg>
+      <div id="zzz" class="zzz">Z z z</div>
+    </div>
+    <div id="fx" class="fx"></div>
+  </main>
+
+  <div class="controls">
+    <button id="mic" class="mic" aria-label="Talk to Bumble">
+      <span class="mic-icon">🎤</span>
+      <span class="mic-label">Talk</span>
+    </button>
+    <nav class="games" aria-label="Games">
+      <button data-game="colors"><span>🎨</span>Colors</button>
+      <button data-game="count"><span>🔢</span>Count</button>
+      <button data-game="animals"><span>🐮</span>Animals</button>
+      <button data-game="abc"><span>🔤</span>ABC</button>
+      <button data-game="shapes"><span>⭐</span>Shapes</button>
+      <button data-game="body"><span>👃</span>Body</button>
+      <button data-game="song"><span>🎵</span>Song</button>
+    </nav>
+  </div>
+</div>
+
+<!-- First tap unlocks sound on phones -->
+<div id="splash" class="splash">
+  <svg viewBox="0 0 300 300" class="splash-bear" aria-hidden="true">
+    <circle cx="76" cy="70" r="34" fill="#C8792E"/><circle cx="224" cy="70" r="34" fill="#C8792E"/>
+    <circle cx="76" cy="70" r="19" fill="#EFA968"/><circle cx="224" cy="70" r="19" fill="#EFA968"/>
+    <circle cx="150" cy="150" r="100" fill="#C8792E"/>
+    <ellipse cx="150" cy="196" rx="56" ry="42" fill="#F6D29A"/>
+    <ellipse cx="112" cy="142" rx="12" ry="15" fill="#3B2210"/><ellipse cx="188" cy="142" rx="12" ry="15" fill="#3B2210"/>
+    <ellipse cx="150" cy="178" rx="19" ry="13" fill="#3B2210"/>
+    <path d="M126 200 Q150 222 174 200" stroke="#3B2210" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </svg>
+  <button id="start" class="start">Tap to play! 🐻</button>
+</div>
+
+<dialog id="settings">
+  <form method="dialog" class="settings-form">
+    <h2>Grown-up settings</h2>
+    <label>Child's name
+      <input id="setName" type="text" maxlength="20" placeholder="e.g. Mia" autocomplete="off">
+    </label>
+    <label>Voice
+      <select id="setVoice"></select>
+    </label>
+    <label>Voice pitch <output id="pitchOut"></output>
+      <input id="setPitch" type="range" min="1" max="2" step="0.1">
+    </label>
+    <label>Talking speed <output id="rateOut"></output>
+      <input id="setRate" type="range" min="0.6" max="1.1" step="0.05">
+    </label>
+    <label class="row"><input id="setListen" type="checkbox"> Listen for answers in games</label>
+    <p class="note" id="micNote"></p>
+    <div class="btns">
+      <button type="button" id="testVoice">Test voice</button>
+      <button value="save" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
