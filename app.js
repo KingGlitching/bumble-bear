@@ -76,7 +76,8 @@
   const showTip = () => { soundTip.classList.remove('hidden'); clearTimeout(tipT); tipT = setTimeout(() => soundTip.classList.add('hidden'), 7000); };
   let soundWorked = false;
   let lastSoundError = '';
-  const V = () => (settings.natural !== false && window.BumbleVoice && window.BumbleVoice.ready) ? window.BumbleVoice : null;
+  let naturalFailed = 0;
+  const V = () => (settings.natural !== false && settings.naturalSession !== false && window.BumbleVoice && window.BumbleVoice.ready) ? window.BumbleVoice : null;
   function stopSpeech() {
     if (window.BumbleVoice) window.BumbleVoice.stop();
     if (window.BumbleSongs) window.BumbleSongs.stop();
@@ -93,8 +94,13 @@
       if (synth && (synth.speaking || synth.pending)) synth.cancel();
       nv.setPitch(1 + (settings.pitch - 1) * 0.3);
       const rate = (opts.rate || settings.rate) / 0.9;
+      const myRun = run;
       return nv.speak(clean, { rate, onStart: () => { bear.classList.add('talking'); soundWorked = true; soundTip.classList.add('hidden'); } })
-        .catch(() => {}).then(() => bear.classList.remove('talking'));
+        .catch(() => false).then((ok) => {
+          bear.classList.remove('talking');
+          // iPhone sometimes refuses to play the natural voice — use the phone's own voice instead
+          if (ok === false && myRun === run) { naturalFailed++; if (naturalFailed >= 2) settings.naturalSession = false; return sayBuiltIn(clean, opts); }
+        });
     }
     return sayBuiltIn(clean, opts);
   }
@@ -898,6 +904,7 @@
     for (const h of heardList) {
       qm = /\b(?:what(?:'s| is| are)|who(?:'s| is| was)|tell me about|what do you know about|teach me about|i want to know about|do you know about)\s+(?:a |an |the |some )?([a-z0-9' -]{2,50})/.exec(h)
         || /\bwhy (?:is|are|do|does|did|can't|can) (?:a |an |the )?([a-z']{3,20})/.exec(h)
+        || /\b(?:where|when) (?:is|are|do|does|did) (?:a |an |the )?([a-z']{3,20})/.exec(h)
         || /\bhow (?:do|does|did|can) (?:a |an |the )?([a-z']{3,20})/.exec(h);
       if (qm) break;
     }
@@ -961,6 +968,8 @@
         return;
       }
       chatProblem = r.error;
+      const why = { 'no-key': 'no API key saved', 'bad-key': 'the API key was rejected', billing: 'the account needs credit (Billing)', busy: 'too many requests, try again soon', network: "couldn't reach Anthropic", server: 'Anthropic had an error' }[r.error];
+      if (why) { soundTip.textContent = '🧠 Real conversation is off: ' + why + '. Grown-ups: hold ⚙️ → Test key.'; showTip(); setTimeout(() => { soundTip.textContent = '🔇 No sound? Turn the volume up. iPhone: turn the silent switch off.'; }, 7500); }
       if (r.error === 'time-up') return say("Bumble had so much fun talking with you! Talking time is done for today. Want to play a game?");
       // otherwise fall back to Bumble's built-in answers below
     }
@@ -1044,7 +1053,6 @@
     await respond(heard, id);
     // keep the conversation going without tapping again
     for (let turns = 0; settings.keepTalking !== false && turns < (chatOn() ? 12 : 5) && alive(id) && !game; turns++) {
-      bubble.textContent = '👂 Bumble is listening...';
       const more = await listen(7);
       if (!alive(id) || !more) { if (alive(id)) bubble.textContent = 'Tap the red button to talk to Bumble!'; break; }
       await respond(more, id);
@@ -1090,6 +1098,7 @@
     $('#splash').classList.add('gone');
     loadVoices();
     if (window.BumbleVoice) window.BumbleVoice.unlock();
+    if (synth && window.BumbleVoice && window.BumbleVoice.ready) { try { const u = new SpeechSynthesisUtterance('.'); u.volume = 0; synth.speak(u); } catch (e) {} }
     if (window.BumbleSongs) window.BumbleSongs.unlock();
     if (window.BumbleAnimals) window.BumbleAnimals.unlock();
     prepareNaturalVoice();

@@ -77,15 +77,16 @@ async function speak(text, { rate = 1, onStart } = {}) {
   stop();
   const token = {}; current = token;
   const blob = await synth(text);
-  if (current !== token) return;
+  if (current !== token) return true;
   const url = URL.createObjectURL(blob);
   return new Promise((resolve) => {
-    const done = () => { audio.onended = audio.onerror = audio.onpause = null; URL.revokeObjectURL(url); resolve(); };
-    audio.onended = done; audio.onerror = done; audio.onpause = () => { if (current !== token) done(); };
+    let started = false;
+    const done = (ok = true) => { audio.onended = audio.onerror = audio.onpause = null; URL.revokeObjectURL(url); resolve(ok && started); };
+    audio.onended = () => done(true); audio.onerror = () => done(false); audio.onpause = () => { if (current !== token) done(true); };
     audio.src = url;
     audio.preservesPitch = false; audio.mozPreservesPitch = false; audio.webkitPreservesPitch = false;
     audio.playbackRate = Math.max(0.6, Math.min(1.6, pitch * rate));
-    audio.play().then(() => { if (onStart) onStart(); }).catch(() => done());
+    audio.play().then(() => { started = true; if (onStart) onStart(); }).catch(() => done(false));
   });
 }
 

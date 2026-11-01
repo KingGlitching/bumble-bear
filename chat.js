@@ -111,8 +111,12 @@ Use at most one tag per reply.`;
       });
       if (r.ok) return 'ok';
       const j = await r.json().catch(() => ({}));
-      return (j.error && j.error.message) || ('error ' + r.status);
-    } catch (e) { return 'network error'; }
+      const msg = (j.error && j.error.message) || '';
+      if (r.status === 401) return 'The key was rejected (' + msg + '). Copy it again — make sure nothing is missing at the start or end.';
+      if (/credit|balance|billing/i.test(msg)) return 'The key works, but the account has no credit. Go to console.anthropic.com → Billing and add a few dollars.';
+      if (r.status === 404) return 'Model not found (' + msg + ').';
+      return (msg || 'error') + ' (code ' + r.status + ')';
+    } catch (e) { return 'Could not reach Anthropic — check the internet connection.'; }
   }
 
   return {
