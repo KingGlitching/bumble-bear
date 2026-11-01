@@ -654,6 +654,11 @@
   ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => lockBtn.addEventListener(ev, () => { lockBtn.classList.remove('holding'); clearTimeout(lockHoldT); }));
   lockBtn.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  /* ---------------- conversation helpers ---------------- */
+  let chatProblem = '';
+  const chatOn = () => !!(window.BumbleChat && window.BumbleChat.enabled);
+  const wantsGame = (t) => /\b(play|let's|lets|let us|start|game|games|quiz|watch|turn on|put on)\b/.test(t);
+
   /* ---------------- animals ---------------- */
   const AN = window.BumbleAnimals;
   let curAnimal = null;
@@ -896,7 +901,7 @@
         || /\bhow (?:do|does|did|can) (?:a |an |the )?([a-z']{3,20})/.exec(h);
       if (qm) break;
     }
-    if (qm) {
+    if (qm && !chatOn()) {
       const topic = qm[1].replace(/\b(please|bumble|for me|right now)\b/g, '').trim();
       const an2 = AN.find(topic);
       if (an2 && topic.split(' ').length <= 3) return animalShow(an2, id, false);
@@ -918,12 +923,12 @@
         return;
       }
     }
-    if (has(t, ['video', 'videos', 'youtube', 'tv', 'watch tv', 'cartoon', 'cartoons'])) return startGame('videos');
-    if (has(t, ['new word', 'new words', 'teach me a word', 'word of the day', 'big word', 'teach me'])) return startGame('newword');
-    if (has(t, ['say it', 'practice', 'talking practice'])) return startGame('sayit');
-    if (has(t, ['quiz', 'ask me', 'question', 'questions', 'test me'])) return startGame('quiz');
-    if (has(t, ['math', 'maths', 'adding', 'add', 'plus', 'minus', 'take away', 'times'])) return startGame('math');
-    if (has(t, ['read', 'reading', 'words', 'spelling', 'rhyme', 'rhymes'])) return startGame('words');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['video', 'videos', 'youtube', 'tv', 'watch tv', 'cartoon', 'cartoons'])) return startGame('videos');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['new word', 'new words', 'teach me a word', 'word of the day', 'big word', 'teach me'])) return startGame('newword');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['say it', 'practice', 'talking practice'])) return startGame('sayit');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['quiz', 'ask me', 'question', 'questions', 'test me'])) return startGame('quiz');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['math', 'maths', 'adding', 'add', 'plus', 'minus', 'take away', 'times'])) return startGame('math');
+    if ((!chatOn() || wantsGame(t)) && has(t, ['read', 'reading', 'words', 'spelling', 'rhyme', 'rhymes'])) return startGame('words');
     // "how do you spell cat"
     // "count to 20"
     sm = /\bcount (?:to|up to|2)\s+(.+)/.exec(heardList[0] || '');
@@ -934,6 +939,30 @@
       for (let i = 0; i < nums.length && alive(id); i += 10) await say(nums.slice(i, i + 10).join(', ') + (i + 10 >= nums.length ? '!' : ','));
       if (alive(id)) { stars(); await say('Yay! We counted to ' + n + '!'); }
       return;
+    }
+
+    // Real conversation (Claude) for everything that isn't a command
+    if (chatOn()) {
+      bubble.textContent = '💭 Bumble is thinking...';
+      pose('giggle', 600);
+      const r = await window.BumbleChat.ask(heardList[0], {
+        age: settings.age, name: settings.name, readLevel: readLevel(), mathLevel: mathLevel(),
+        animals: AN.LIST.filter((x) => x.snd).map((x) => x.n).join(', '),
+      });
+      if (!alive(id)) return;
+      if (!r.error) {
+        if (!window.BumbleKnow.safe(r.text)) return say("Let's talk about something fun! What's your favorite animal?");
+        let a = null;
+        if (r.animal) { a = AN.LIST.find((x) => x.n === r.animal) || null; if (a) showAnimalCard(a); }
+        else if (r.emoji && /\p{Extended_Pictographic}/u.test(r.emoji)) { showCard(`<div class="big">${esc(r.emoji)}</div>`); card.querySelector('.tap')?.remove(); }
+        pose('happy', 700);
+        await say(r.text);
+        if (a && a.snd && alive(id)) await AN.playSound(a);
+        return;
+      }
+      chatProblem = r.error;
+      if (r.error === 'time-up') return say("Bumble had so much fun talking with you! Talking time is done for today. Want to play a game?");
+      // otherwise fall back to Bumble's built-in answers below
     }
 
     if (has(t, ['i love you', 'love you', 'love bumble', 'love'])) { hearts(); pose('hug', 900); return say(`Aww! Bumble loves you too, ${name}! Big bear hug!`); }
@@ -1014,7 +1043,7 @@
     }
     await respond(heard, id);
     // keep the conversation going without tapping again
-    for (let turns = 0; settings.keepTalking !== false && turns < 5 && alive(id) && !game; turns++) {
+    for (let turns = 0; settings.keepTalking !== false && turns < (chatOn() ? 12 : 5) && alive(id) && !game; turns++) {
       bubble.textContent = '👂 Bumble is listening...';
       const more = await listen(7);
       if (!alive(id) || !more) { if (alive(id)) bubble.textContent = 'Tap the red button to talk to Bumble!'; break; }
@@ -1092,6 +1121,8 @@
     $('#pitchOut').textContent = settings.pitch; $('#rateOut').textContent = settings.rate;
     $('#micNote').textContent = diagnostics();
     $('#setAge').value = settings.age;
+    if (window.BumbleChat) { const c = window.BumbleChat.cfg; $('#setChatOn').checked = c.on; $('#setChatKey').value = ''; $('#setChatKey').placeholder = c.key || 'sk-ant-...'; $('#setChatMin').value = c.minutes || 0;
+      $('#chatNote').textContent = c.key ? `Key saved (${c.key}). ${isFinite(window.BumbleChat.minutesLeft()) ? Math.round(window.BumbleChat.minutesLeft()) + ' talking minutes left today.' : ''}${chatProblem ? ' Last problem: ' + chatProblem + '.' : ''}` : 'No key yet — Bumble uses its built-in answers.'; }
     $('#setChallenge').value = String(settings.challenge || 0); $('#setAdaptive').checked = settings.adaptive !== false; $('#setKeepTalking').checked = settings.keepTalking !== false;
     $('#setVideos').value = (settings.videos || []).map((id) => 'https://youtu.be/' + id).join('\n'); $('#setVideoMin').value = settings.videoMin || 0;
     $('#setFur').value = settings.fur || 'honey'; $('#setOutfit').value = settings.outfit || 'bow'; $('#setHat').value = settings.hat || 'none';
@@ -1143,6 +1174,20 @@
     $('#spStatus').textContent = 'Opening Spotify...';
     try { await S.login(); } catch (e) { $('#spStatus').textContent = 'Could not start Spotify login.'; }
   });
+  $('#chatTest').addEventListener('click', async () => {
+    const k = $('#setChatKey').value.trim();
+    if (k) window.BumbleChat.setKey(k);
+    $('#chatNote').textContent = 'Testing...';
+    const r = await window.BumbleChat.test(k || '');
+    $('#chatNote').textContent = r === 'ok' ? '✅ It works! Bumble can have real conversations now.' : '❌ ' + r;
+  });
+  $('#chatLogBtn').addEventListener('click', () => {
+    const l = window.BumbleChat.getLog().slice(-60).reverse();
+    const box = $('#chatLog');
+    box.innerHTML = l.length ? l.map((x) => `<div class="log-row"><small>${new Date(x.t).toLocaleString()}</small><div>🧒 ${esc(x.kid)}</div><div>🐻 ${esc(x.bumble)}</div></div>`).join('') : '<p class="note">No conversations yet.</p>';
+    box.classList.toggle('hidden');
+  });
+  $('#chatClear').addEventListener('click', () => { window.BumbleChat.clearLog(); $('#chatLog').innerHTML = '<p class="note">Cleared.</p>'; });
   $('#spDisconnect').addEventListener('click', () => { if (window.BumbleSpotify) { window.BumbleSpotify.disconnect(); updateSpotifyStatus(); } });
   ['#setFur', '#setOutfit', '#setHat'].forEach((sel) => $(sel).addEventListener('change', () => {
     bear.dataset.fur = $('#setFur').value; bear.dataset.outfit = $('#setOutfit').value; bear.dataset.hat = $('#setHat').value;
@@ -1157,6 +1202,7 @@
     settings.videos = [...new Set($('#setVideos').value.split(/[\s,]+/).map(ytId).filter(Boolean))].slice(0, 60);
     settings.videoMin = Math.max(0, Math.min(240, parseInt($('#setVideoMin').value, 10) || 0));
     settings.challenge = parseInt($('#setChallenge').value, 10) || 0; settings.adaptive = $('#setAdaptive').checked; settings.keepTalking = $('#setKeepTalking').checked;
+    if (window.BumbleChat) { const k = $('#setChatKey').value.trim(); if (k) window.BumbleChat.setKey(k); window.BumbleChat.setOn($('#setChatOn').checked); window.BumbleChat.setMinutes($('#setChatMin').value); }
     settings.age = Math.min(12, Math.max(1, parseInt($('#setAge').value, 10) || settings.age || 2));
     settings.readLevel = parseInt($('#setReadLevel').value, 10) || 0;
     settings.mathLevel = parseInt($('#setMathLevel').value, 10) || 0;

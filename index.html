@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bumble">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <div id="app">
@@ -255,6 +255,23 @@
     </div>
     <p class="note" id="micNote"></p>
 
+    <h3>🧠 Real conversations</h3>
+    <p class="note">Bumble can really chat with her using Claude (Anthropic's AI). It costs about a tenth of a cent per reply, paid with your own API key: go to console.anthropic.com → sign up → Billing (add a few dollars) → API keys → Create key, then paste it here. The key stays on this phone only. What she says is sent to Anthropic to make Bumble's replies. Without a key, Bumble uses its built-in answers.</p>
+    <label class="row"><input id="setChatOn" type="checkbox"> Turn on real conversations</label>
+    <label>API key
+      <input id="setChatKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
+    </label>
+    <label>Talking time per day (minutes, 0 = no limit)
+      <input id="setChatMin" type="number" min="0" max="240" step="5" inputmode="numeric">
+    </label>
+    <div class="btns left">
+      <button type="button" id="chatTest">Test key</button>
+      <button type="button" id="chatLogBtn">See what she talked about</button>
+      <button type="button" id="chatClear">Clear history</button>
+    </div>
+    <p class="note" id="chatNote"></p>
+    <div id="chatLog" class="chat-log hidden"></div>
+
     <h3>📺 Videos</h3>
     <p class="note">Only videos you add here show up. Paste YouTube or YouTube Kids links, one per line (use the Share → Copy link button).</p>
     <label>Approved video links
@@ -291,12 +308,13 @@
   </form>
 </dialog>
 
-<script src="learn.js?v=6"></script>
-<script src="animals.js?v=6"></script>
-<script src="songs.js?v=6"></script>
-<script src="knowledge.js?v=6"></script>
-<script src="spotify.js?v=6"></script>
-<script type="module" src="voice.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="learn.js?v=7"></script>
+<script src="animals.js?v=7"></script>
+<script src="songs.js?v=7"></script>
+<script src="knowledge.js?v=7"></script>
+<script src="chat.js?v=7"></script>
+<script src="spotify.js?v=7"></script>
+<script type="module" src="voice.js?v=7"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

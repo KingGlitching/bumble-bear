@@ -283,3 +283,7 @@ body.locked a { pointer-events: none; opacity: .4; }
 .yt-shield.logo { right: 0; bottom: 0; width: 22%; height: 16%; }
 .video-close { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 10px; width: 52px; height: 52px; border-radius: 50%; background: #fff; font-size: 22px; font-weight: 900; z-index: 21; }
 .settings-form textarea { font: inherit; font-size: 14px; padding: 10px; border-radius: 12px; border: 2px solid #E6D3B0; resize: vertical; }
+.chat-log { max-height: 260px; overflow-y: auto; background: #FFF8EA; border-radius: 12px; padding: 8px; font-size: 14px; user-select: text; }
+.chat-log.hidden { display: none; }
+.log-row { border-bottom: 1px solid #F0E0C0; padding: 6px 0; }
+.log-row small { opacity: .6; }

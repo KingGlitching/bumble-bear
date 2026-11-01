@@ -16,6 +16,7 @@ A talking bear for toddlers. Tap the big red button and talk — Bumble listens 
 - **Smarter answers:** "What is a volcano?", "Tell me about the moon" (Simple English Wikipedia), "What does gigantic mean?" (Free Dictionary API), and spelling of any real word — all through a kid-safety filter.
 - **New Word:** a new vocabulary word with a kid-friendly meaning, harder words as she grows.
 - **Challenge + auto level-up:** start harder than her age, and Bumble levels up when she gets 8 of 10 right.
+- **Real conversations (optional):** add your own Anthropic API key in ⚙️ and Bumble chats for real using Claude Haiku 5.5 — kid-safe rules, a daily talking-time limit, and a history you can read. About a tenth of a cent per reply.
 - **Music:** connect Spotify (Premium) and say "play Baby Shark". Explicit songs are always skipped.
 
 ## Grown-ups
