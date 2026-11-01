@@ -19,6 +19,7 @@
 <div id="app">
   <header>
     <div class="title">Bumble <span>Bear</span></div>
+    <div id="voiceStatus" class="voice-status"></div>
     <button id="gear" class="gear" aria-label="Grown-up settings (press and hold)">⚙️</button>
   </header>
 
@@ -98,13 +99,17 @@
       <span class="mic-label">Talk</span>
     </button>
     <nav class="games" aria-label="Games">
+      <button data-game="quiz"><span>🎲</span>Surprise</button>
+      <button data-game="math"><span>🧮</span>Math</button>
+      <button data-game="words"><span>📖</span>Words</button>
       <button data-game="colors"><span>🎨</span>Colors</button>
       <button data-game="count"><span>🔢</span>Count</button>
       <button data-game="animals"><span>🐮</span>Animals</button>
       <button data-game="abc"><span>🔤</span>ABC</button>
       <button data-game="shapes"><span>⭐</span>Shapes</button>
       <button data-game="body"><span>👃</span>Body</button>
-      <button data-game="song"><span>🎵</span>Song</button>
+      <button data-game="music"><span>🎵</span>Music</button>
+      <button data-game="song"><span>💃</span>Dance</button>
     </nav>
   </div>
 </div>
@@ -121,7 +126,9 @@
     <path d="M126 200 Q150 222 174 200" stroke="#3B2210" stroke-width="6" fill="none" stroke-linecap="round"/>
   </svg>
   <button id="start" class="start">Tap to play! 🐻</button>
+  <p class="tip">🔊 Turn the volume up.<br>iPhone: flip the side silent switch off (no orange showing).</p>
 </div>
+<div id="soundTip" class="sound-tip hidden">🔇 No sound? Turn the volume up. iPhone: turn the silent switch off.</div>
 
 <dialog id="settings">
   <form method="dialog" class="settings-form">
@@ -129,7 +136,24 @@
     <label>Child's name
       <input id="setName" type="text" maxlength="20" placeholder="e.g. Mia" autocomplete="off">
     </label>
-    <label>Voice
+    <h3>📚 Learning</h3>
+    <label>Age
+      <input id="setAge" type="number" min="1" max="12" step="1" inputmode="numeric">
+    </label>
+    <label>Reading level
+      <select id="setReadLevel"></select>
+    </label>
+    <label>Math level
+      <select id="setMathLevel"></select>
+    </label>
+    <p class="note"></p>
+    <h3>🗣️ Voice</h3>
+    <label class="row"><input id="setNatural" type="checkbox"> Natural human-like voice</label>
+    <label>Natural voice
+      <select id="setNaturalVoice"></select>
+    </label>
+    <p class="note" id="naturalNote"></p>
+    <label>Backup voice (phone's built-in)
       <select id="setVoice"></select>
     </label>
     <label>Voice pitch <output id="pitchOut"></output>
@@ -139,14 +163,33 @@
       <input id="setRate" type="range" min="0.6" max="1.1" step="0.05">
     </label>
     <label class="row"><input id="setListen" type="checkbox"> Listen for answers in games</label>
+    <div class="btns left">
+      <button type="button" id="testVoice">🔊 Test sound</button>
+      <button type="button" id="testMic">🎤 Test mic</button>
+    </div>
     <p class="note" id="micNote"></p>
+
+    <h3>🎵 Spotify music</h3>
+    <p class="note">Needs Spotify Premium. Songs marked explicit are always skipped.</p>
+    <label>Spotify Client ID
+      <input id="setSpotifyId" type="text" maxlength="64" placeholder="from developer.spotify.com" autocomplete="off" spellcheck="false">
+    </label>
+    <p class="note">Redirect URI to paste into Spotify: <b id="redirectUri"></b></p>
+    <div class="btns left">
+      <button type="button" id="spConnect">Connect Spotify</button>
+      <button type="button" id="spDisconnect">Disconnect</button>
+    </div>
+    <p class="note" id="spStatus"></p>
+
     <div class="btns">
-      <button type="button" id="testVoice">Test voice</button>
       <button value="save" class="primary">Save</button>
     </div>
   </form>
 </dialog>
 
+<script src="learn.js"></script>
+<script src="spotify.js"></script>
+<script type="module" src="voice.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

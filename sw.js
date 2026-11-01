@@ -1,6 +1,6 @@
-// Offline support: keeps Bumble working without internet (talking needs the phone's speech service).
-const CACHE = 'bumble-v1';
-const FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.json',
+// Offline support: keeps Bumble working without internet (hearing words and Spotify still need internet).
+const CACHE = 'bumble-v3';
+const FILES = ['./', 'index.html', 'style.css', 'app.js', 'spotify.js', 'learn.js', 'voice.js', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -10,13 +10,13 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
-// Network first so updates show up, fall back to the saved copy when offline.
+// Only Bumble's own files are cached. Spotify requests go straight to the network, never cached.
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      if (res.ok && !url.search) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {}); }
       return res;
     }).catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match('index.html')))
   );
