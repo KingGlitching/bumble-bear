@@ -13,6 +13,9 @@ A talking bear for toddlers. Tap the big red button and talk — Bumble listens 
 - **Music Box:** public-domain nursery songs that play inside the app, offline.
 - **Videos:** only grown-up-approved YouTube links, with an optional time limit.
 - **Kid Lock:** full screen, back button blocked, hold 🔓 3 s to unlock (plus Guided Access / App Pinning steps).
+- **Smarter answers:** "What is a volcano?", "Tell me about the moon" (Simple English Wikipedia), "What does gigantic mean?" (Free Dictionary API), and spelling of any real word — all through a kid-safety filter.
+- **New Word:** a new vocabulary word with a kid-friendly meaning, harder words as she grows.
+- **Challenge + auto level-up:** start harder than her age, and Bumble levels up when she gets 8 of 10 right.
 - **Music:** connect Spotify (Premium) and say "play Baby Shark". Explicit songs are always skipped.
 
 ## Grown-ups
@@ -37,6 +40,7 @@ The microphone needs `https://` (GitHub Pages provides this) or `localhost`.
 4. Open the Spotify app on the phone once so Bumble can find it.
 
 ## Credits
+- Word meanings: [Free Dictionary API](https://dictionaryapi.dev) (Wiktionary, CC BY-SA). Answers: [Simple English Wikipedia](https://simple.wikipedia.org) (CC BY-SA).
 - Animal sounds: Wikimedia Commons (public domain / Creative Commons). Sounds play from Wikimedia's servers:
   - [Mudchute cow 1.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_cow_1.ogg) — CC BY-SA 3.0 — Secretlondon
   - [Mudchute sheep 1.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_sheep_1.ogg) — CC BY-SA 3.0 — Secretlondon

@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bumble">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -155,6 +155,7 @@
     </button>
     <nav class="games" aria-label="Games">
       <button data-game="sayit"><span>🗣️</span>Say It</button>
+      <button data-game="newword"><span>📚</span>New Word</button>
       <button data-game="videos"><span>📺</span>Videos</button>
       <button data-game="quiz"><span>🎲</span>Surprise</button>
       <button data-game="math"><span>🧮</span>Math</button>
@@ -220,6 +221,10 @@
     <label>Age
       <input id="setAge" type="number" min="1" max="12" step="1" inputmode="numeric">
     </label>
+    <label>Challenge
+      <select id="setChallenge"><option value="0">Normal for her age</option><option value="1">Harder (+1 level)</option><option value="2">Hardest (+2 levels)</option></select>
+    </label>
+    <label class="row"><input id="setAdaptive" type="checkbox"> Level up automatically when she's doing great</label>
     <label>Reading level
       <select id="setReadLevel"></select>
     </label>
@@ -243,6 +248,7 @@
       <input id="setRate" type="range" min="0.6" max="1.1" step="0.05">
     </label>
     <label class="row"><input id="setListen" type="checkbox"> Listen for answers in games</label>
+    <label class="row"><input id="setKeepTalking" type="checkbox"> Keep listening after Bumble answers (no need to tap again)</label>
     <div class="btns left">
       <button type="button" id="testVoice">🔊 Test sound</button>
       <button type="button" id="testMic">🎤 Test mic</button>
@@ -285,11 +291,12 @@
   </form>
 </dialog>
 
-<script src="learn.js?v=4"></script>
-<script src="animals.js?v=4"></script>
-<script src="songs.js?v=4"></script>
-<script src="spotify.js?v=4"></script>
-<script type="module" src="voice.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="learn.js?v=5"></script>
+<script src="animals.js?v=5"></script>
+<script src="songs.js?v=5"></script>
+<script src="knowledge.js?v=5"></script>
+<script src="spotify.js?v=5"></script>
+<script type="module" src="voice.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

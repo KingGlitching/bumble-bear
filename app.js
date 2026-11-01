@@ -14,7 +14,7 @@
   const fx = $('#fx');
 
   /* ---------------- settings ---------------- */
-  const DEFAULTS = { name: '', pitch: 1.3, rate: 0.9, voice: '', listen: true, natural: true, naturalVoice: 'en_US-hfc_female-medium', fur: 'honey', outfit: 'bow', hat: 'none', videos: [], videoMin: 0, age: 2, readLevel: 0, mathLevel: 0 };
+  const DEFAULTS = { name: '', pitch: 1.3, rate: 0.9, voice: '', listen: true, natural: true, naturalVoice: 'en_US-hfc_female-medium', fur: 'honey', outfit: 'bow', hat: 'none', videos: [], videoMin: 0, challenge: 1, adaptive: true, keepTalking: true, age: 2, readLevel: 0, mathLevel: 0 };
   let settings = { ...DEFAULTS };
   try { Object.assign(settings, JSON.parse(localStorage.getItem('bumble-settings') || '{}')); } catch (e) {}
   const saveSettings = () => { try { localStorage.setItem('bumble-settings', JSON.stringify(settings)); } catch (e) {} };
@@ -396,6 +396,22 @@
     words: { list: () => [0], play: (_, id) => quizLoop('words', id) },
     quiz: { list: () => [0], play: (_, id) => quizLoop('quiz', id) },
     videos: { list: () => [0], async play() { showVideos(); } },
+    newword: { list: () => [0], async play(_, id) {
+      const w = window.BumbleKnow.newWord(readLevel());
+      showCard(`<div class="big">${w.e}</div><div class="word" style="text-transform:none">${esc(w.word)}</div><div class="note" style="font-size:15px;padding:0 8px">${esc(w.meaning)}</div>`);
+      if (!(await sayAll([`Here's a new word: ${w.word}!`, `${cap(w.word)} means ${w.meaning}.`], id))) return;
+      if (readLevel() >= 3) {
+        const d = await window.BumbleKnow.define(w.word);
+        if (!alive(id)) return;
+        if (d && d.ex && d.ex.length < 120) await say(`Here's how to use it: ${d.ex}`);
+        if (!alive(id)) return;
+      }
+      await say(`Can you say ${w.word}?`);
+      if (!alive(id)) return;
+      const r = await cheerAnswer(id, [w.word], w.word);
+      if (r === true) { const p = wordProg[w.word] || { ok: 0, tries: 0 }; p.ok++; p.tries++; wordProg[w.word] = p; saveWords(); }
+      if (alive(id)) bubble.textContent = '👉 Tap the card for another new word!';
+    } },
     sayit: { list: () => [0], async play(_, id) { await say("Let's learn new words! Listen to Bumble, then you say it."); if (alive(id)) await sayItLoop(id); } },
     music: { list: () => [0], async play(_, id) {
       showMusicPicker();
@@ -411,14 +427,30 @@
 
   /* ---------------- learning questions (Math / Words / Surprise) ---------------- */
   const LN = window.BumbleLearn;
-  const readLevel = () => Number(settings.readLevel) || LN.levelForAge(settings.age);
-  const mathLevel = () => Number(settings.mathLevel) || LN.levelForAge(settings.age);
+  let boost = { math: 0, words: 0, nMath: 0, nWords: 0 };
+  try { Object.assign(boost, JSON.parse(localStorage.getItem('bumble-boost') || '{}')); } catch (e) {}
+  const saveBoost = () => { try { localStorage.setItem('bumble-boost', JSON.stringify(boost)); } catch (e) {} };
+  const clampL = (n) => Math.max(1, Math.min(6, n));
+  const autoLevel = (k) => clampL(LN.levelForAge(settings.age) + (Number(settings.challenge) || 0) + (settings.adaptive !== false ? (boost[k] || 0) : 0));
+  const readLevel = () => Number(settings.readLevel) || autoLevel('words');
+  const mathLevel = () => Number(settings.mathLevel) || autoLevel('math');
   let stats = { math: [], words: [] };
   try { Object.assign(stats, JSON.parse(localStorage.getItem('bumble-stats') || '{}')); } catch (e) {}
   function record(kind, ok) {
     if (kind === 'sounds') kind = 'words';
     stats[kind] = (stats[kind] || []).concat(ok ? 1 : 0).slice(-20);
     try { localStorage.setItem('bumble-stats', JSON.stringify(stats)); } catch (e) {}
+    // grow with her: level up after 8 of the last 10 right, ease off after 3 or fewer
+    const manual = kind === 'math' ? Number(settings.mathLevel) : Number(settings.readLevel);
+    if (settings.adaptive === false || manual) return null;
+    const nk = kind === 'math' ? 'nMath' : 'nWords';
+    boost[nk] = (boost[nk] || 0) + 1;
+    const last = stats[kind].slice(-10), right = last.reduce((a, b) => a + b, 0);
+    let change = null;
+    if (boost[nk] >= 10 && right >= 8 && autoLevel(kind) < 6) { boost[kind]++; boost[nk] = 0; change = 'up'; }
+    else if (boost[nk] >= 10 && right <= 3 && autoLevel(kind) > 1) { boost[kind]--; boost[nk] = 0; change = 'down'; }
+    saveBoost();
+    return change;
   }
   let quizAnswer = null; // resolver for the current question
   let streak = 0;
@@ -471,7 +503,7 @@
         if (!alive(id)) return null;
         await say(`${rand(['Yes!', 'You got it!', 'Great job!', 'Hooray!', 'Super smart!', 'Wow!'])} ${q.explain}`);
         if (streak % 5 === 0 && alive(id)) { stars(); hearts(); pose('dance'); await say(`${numWord5(streak)} in a row! You are a superstar, ${kid()}!`); bear.classList.remove('dance'); }
-        record(kind, true);
+        if (record(kind, true) === 'up' && alive(id)) { hearts(); stars(); pose('dance'); await say(`Level up! ${cap(kid())} is so smart! Bumble is making ${kind === 'math' ? 'math' : 'words'} harder!`); bear.classList.remove('dance'); }
         return true;
       }
       tries++; streak = 0;
@@ -483,7 +515,7 @@
         continue;
       }
       markChoices(q, pick.value);
-      await say(`Good try! ${q.explain}`);
+      await say(`Not quite. ${q.explain}`);
       record(kind, false);
       return false;
     }
@@ -825,18 +857,74 @@
         return say(r.said);
       }
     }
+    // "how do you spell elephant" — any real, kid-safe word
+    let sm = null;
+    for (const h of heardList) { sm = /\bspell(?:ing)?\s+(?:of\s+)?(?:the\s+word\s+|a\s+|an\s+)?([a-z']+)/.exec(h); if (sm) break; }
+    if (sm) {
+      const w = sm[1];
+      if (!window.BumbleKnow.spellable(w)) return say("Hmm, let's spell a different word!");
+      showCard(`<div class="sylls" style="font-size:40px">${w.toUpperCase().split('').map((c, i) => `<span data-i="${i}">${LN.esc(c)}</span>`).join('')}</div><div class="word" style="text-transform:none">${LN.esc(w)}</div>`);
+      await say(`${w}.`);
+      const letters = w.toUpperCase().replace(/'/g, '').split('');
+      for (let i = 0; i < letters.length && alive(id); i++) {
+        card.querySelectorAll('.sylls span').forEach((sp) => sp.classList.toggle('on', Number(sp.dataset.i) <= i));
+        await say(letters[i], { rate: settings.rate * 0.9 });
+      }
+      if (alive(id)) { stars(); await say(`${w}! Can you spell it with me?`); }
+      return;
+    }
+    let sk;
+    // "what does gigantic mean" / "define gigantic" / "what is the meaning of gigantic"
+    for (const h of heardList) { sk = /\bwhat (?:does|do|is|'s)\s+(?:the word\s+)?([a-z' ]{2,30}?)\s+mean\b|\b(?:define|meaning of|definition of)\s+(?:the word\s+)?([a-z']{2,30})/.exec(h); if (sk) break; }
+    if (sk) {
+      const w = (sk[1] || sk[2] || '').trim();
+      if (!window.BumbleKnow.safe(w)) return say("That's a grown-up word. Let's ask a grown-up!");
+      bubble.textContent = '📖 Looking it up...';
+      const d = await window.BumbleKnow.define(w);
+      if (!alive(id)) return;
+      if (!d) return say(`Hmm, Bumble doesn't know the word ${w} yet. Let's ask a grown-up!`);
+      showCard(`<div class="big">📖</div><div class="word" style="text-transform:none">${LN.esc(w)}</div>`);
+      await say(window.BumbleKnow.sayDefinition(d));
+      if (alive(id) && d.ex && readLevel() >= 3) await say(`Like this: ${d.ex}`);
+      return;
+    }
+    // "what is a volcano" / "tell me about the moon" / "who is ..." / "why is the sky blue"
+    let qm = null;
+    for (const h of heardList) {
+      qm = /\b(?:what(?:'s| is| are)|who(?:'s| is| was)|tell me about|what do you know about|teach me about|i want to know about|do you know about)\s+(?:a |an |the |some )?([a-z0-9' -]{2,50})/.exec(h)
+        || /\bwhy (?:is|are|do|does|did|can't|can) (?:a |an |the )?([a-z']{3,20})/.exec(h)
+        || /\bhow (?:do|does|did|can) (?:a |an |the )?([a-z']{3,20})/.exec(h);
+      if (qm) break;
+    }
+    if (qm) {
+      const topic = qm[1].replace(/\b(please|bumble|for me|right now)\b/g, '').trim();
+      const an2 = AN.find(topic);
+      if (an2 && topic.split(' ').length <= 3) return animalShow(an2, id, false);
+      if (!/^(that|this|it|you|your name|up|happening|going on)$/.test(topic) && !/^\d/.test(topic)) {
+        if (!window.BumbleKnow.safe(topic)) return say("That's a grown-up question. Let's ask a grown-up!");
+        bubble.textContent = '🔎 Bumble is thinking...';
+        pose('giggle', 600);
+        const info = await window.BumbleKnow.about(topic, readLevel() <= 2 ? 1 : readLevel() <= 4 ? 2 : 3);
+        if (!alive(id)) return;
+        if (info) {
+          const img = /^https:\/\/upload\.wikimedia\.org\//.test(info.image) ? `<img class="cover" alt="" src="${LN.esc(info.image)}">` : '<div class="big">🔎</div>';
+          showCard(`${img}<div class="word" style="font-size:22px;text-transform:none">${LN.esc(info.title)}</div>`);
+          card.querySelector('.tap')?.remove();
+          return say(info.text);
+        }
+        const d = topic.split(' ').length === 1 ? await window.BumbleKnow.define(topic) : null;
+        if (d && alive(id)) return say(window.BumbleKnow.sayDefinition(d));
+        if (alive(id)) return say(`Ooh, good question! Bumble doesn't know about ${topic} yet. Let's ask a grown-up!`);
+        return;
+      }
+    }
     if (has(t, ['video', 'videos', 'youtube', 'tv', 'watch tv', 'cartoon', 'cartoons'])) return startGame('videos');
-    if (has(t, ['say it', 'new word', 'new words', 'practice', 'talking practice'])) return startGame('sayit');
+    if (has(t, ['new word', 'new words', 'teach me a word', 'word of the day', 'big word', 'teach me'])) return startGame('newword');
+    if (has(t, ['say it', 'practice', 'talking practice'])) return startGame('sayit');
     if (has(t, ['quiz', 'ask me', 'question', 'questions', 'test me'])) return startGame('quiz');
     if (has(t, ['math', 'maths', 'adding', 'add', 'plus', 'minus', 'take away', 'times'])) return startGame('math');
     if (has(t, ['read', 'reading', 'words', 'spelling', 'rhyme', 'rhymes'])) return startGame('words');
     // "how do you spell cat"
-    let sm = /\bspell\s+(?:the word\s+)?([a-z']+)/.exec(heardList[0] || '');
-    if (sm && LN.SPELLABLE.has(sm[1])) {
-      const w = sm[1];
-      showCard(`<div class="word" style="font-size:44px;letter-spacing:8px;text-transform:none">${LN.esc(w)}</div>`);
-      return say(`${w}. ${w.toUpperCase().split('').join(', ')}. ${w}!`);
-    }
     // "count to 20"
     sm = /\bcount (?:to|up to|2)\s+(.+)/.exec(heardList[0] || '');
     if (sm) {
@@ -925,6 +1013,13 @@
       return;
     }
     await respond(heard, id);
+    // keep the conversation going without tapping again
+    for (let turns = 0; settings.keepTalking !== false && turns < 5 && alive(id) && !game; turns++) {
+      bubble.textContent = '👂 Bumble is listening...';
+      const more = await listen(7);
+      if (!alive(id) || !more) { if (alive(id)) bubble.textContent = 'Tap the red button to talk to Bumble!'; break; }
+      await respond(more, id);
+    }
   }
 
   /* ---------------- bear taps ---------------- */
@@ -997,9 +1092,10 @@
     $('#pitchOut').textContent = settings.pitch; $('#rateOut').textContent = settings.rate;
     $('#micNote').textContent = diagnostics();
     $('#setAge').value = settings.age;
+    $('#setChallenge').value = String(settings.challenge || 0); $('#setAdaptive').checked = settings.adaptive !== false; $('#setKeepTalking').checked = settings.keepTalking !== false;
     $('#setVideos').value = (settings.videos || []).map((id) => 'https://youtu.be/' + id).join('\n'); $('#setVideoMin').value = settings.videoMin || 0;
     $('#setFur').value = settings.fur || 'honey'; $('#setOutfit').value = settings.outfit || 'bow'; $('#setHat').value = settings.hat || 'none';
-    const lvlOpts = (sel) => '<option value="0">Match age (auto)</option>' + LN.LEVELS.map((l, i) => (l ? `<option value="${i}">${l.name}</option>` : '')).join('');
+    const lvlOpts = (sel) => '<option value="0">Auto (age + challenge, grows with her)</option>' + LN.LEVELS.map((l, i) => (l ? `<option value="${i}">${l.name}</option>` : '')).join('');
     $('#setReadLevel').innerHTML = lvlOpts(); $('#setReadLevel').value = String(settings.readLevel || 0);
     $('#setMathLevel').innerHTML = lvlOpts(); $('#setMathLevel').value = String(settings.mathLevel || 0);
     const pct = (a) => (a && a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length * 100) + '% right (last ' + a.length + ')' : 'no answers yet');
@@ -1060,6 +1156,7 @@
     settings.fur = $('#setFur').value; settings.outfit = $('#setOutfit').value; settings.hat = $('#setHat').value; applyLook();
     settings.videos = [...new Set($('#setVideos').value.split(/[\s,]+/).map(ytId).filter(Boolean))].slice(0, 60);
     settings.videoMin = Math.max(0, Math.min(240, parseInt($('#setVideoMin').value, 10) || 0));
+    settings.challenge = parseInt($('#setChallenge').value, 10) || 0; settings.adaptive = $('#setAdaptive').checked; settings.keepTalking = $('#setKeepTalking').checked;
     settings.age = Math.min(12, Math.max(1, parseInt($('#setAge').value, 10) || settings.age || 2));
     settings.readLevel = parseInt($('#setReadLevel').value, 10) || 0;
     settings.mathLevel = parseInt($('#setMathLevel').value, 10) || 0;
