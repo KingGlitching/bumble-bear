@@ -13,13 +13,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bumble">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div id="app">
   <header>
     <div class="title">Bumble <span>Bear</span></div>
     <div id="voiceStatus" class="voice-status"></div>
+    <button id="lockBtn" class="gear lock" aria-label="Kid lock">🔒</button>
     <button id="gear" class="gear" aria-label="Grown-up settings (press and hold)">⚙️</button>
   </header>
 
@@ -31,63 +32,117 @@
 
     <div id="bearWrap" class="bear-wrap">
       <div class="listen-ring"></div>
-      <svg id="bear" class="bear" viewBox="0 0 300 340" aria-label="Bumble the bear" role="img">
-        <!-- feet -->
-        <ellipse class="fur" cx="105" cy="322" rx="34" ry="16"/>
-        <ellipse class="fur" cx="195" cy="322" rx="34" ry="16"/>
+      <svg id="bear" class="bear" viewBox="0 0 300 340" aria-label="Bumble the bear" role="img" data-outfit="bow" data-hat="none">
+        <ellipse class="shadow" cx="150" cy="330" rx="100" ry="9"/>
+        <!-- feet with paw pads -->
+        <g class="feet">
+          <ellipse class="fur ol" cx="104" cy="314" rx="36" ry="20"/>
+          <ellipse class="fur ol" cx="196" cy="314" rx="36" ry="20"/>
+          <ellipse class="inner" cx="104" cy="318" rx="15" ry="10"/>
+          <ellipse class="inner" cx="196" cy="318" rx="15" ry="10"/>
+          <circle class="inner" cx="90" cy="304" r="4.5"/><circle class="inner" cx="104" cy="301" r="4.5"/><circle class="inner" cx="118" cy="304" r="4.5"/>
+          <circle class="inner" cx="182" cy="304" r="4.5"/><circle class="inner" cx="196" cy="301" r="4.5"/><circle class="inner" cx="210" cy="304" r="4.5"/>
+        </g>
         <!-- body -->
-        <ellipse class="fur" cx="150" cy="268" rx="92" ry="66"/>
-        <ellipse class="light" cx="150" cy="280" rx="56" ry="44"/>
+        <ellipse class="fur ol" cx="150" cy="262" rx="86" ry="64"/>
+        <ellipse class="light" cx="150" cy="272" rx="52" ry="42"/>
+        <path class="belly-heart" d="M150 292 C138 282 130 274 136 266 C141 260 148 262 150 268 C152 262 159 260 164 266 C170 274 162 282 150 292 Z"/>
+        <!-- outfits -->
+        <g class="outfit outfit-overalls">
+          <path class="cloth" d="M96 250 L204 250 L214 296 Q150 336 86 296 Z"/>
+          <rect class="cloth" x="122" y="232" width="56" height="30" rx="8"/>
+          <path class="cloth-dark" d="M108 252 L124 214" stroke-width="10" stroke-linecap="round"/>
+          <path class="cloth-dark" d="M192 252 L176 214" stroke-width="10" stroke-linecap="round"/>
+          <circle class="button" cx="130" cy="240" r="5"/><circle class="button" cx="170" cy="240" r="5"/>
+          <rect class="cloth-dark-fill" x="138" y="270" width="24" height="16" rx="4"/>
+        </g>
+        <g class="outfit outfit-shirt">
+          <path class="shirt" d="M72 236 Q150 206 228 236 L232 296 Q150 336 68 296 Z"/>
+          <path class="shirt-stripe" d="M70 256 Q150 232 230 256 L231 268 Q150 244 69 268 Z"/>
+          <path class="shirt-stripe" d="M69 282 Q150 262 231 282 L232 292 Q150 274 68 294 Z"/>
+          <text x="150" y="292" text-anchor="middle" class="shirt-letter">B</text>
+        </g>
         <!-- arms -->
-        <g class="arm arm-l"><ellipse class="fur" cx="70" cy="262" rx="26" ry="42" transform="rotate(20 70 262)"/></g>
-        <g class="arm arm-r"><ellipse class="fur" cx="230" cy="262" rx="26" ry="42" transform="rotate(-20 230 262)"/></g>
+        <g class="arm arm-l"><ellipse class="fur ol" cx="72" cy="258" rx="25" ry="40" transform="rotate(22 72 258)"/><ellipse class="inner" cx="62" cy="286" rx="11" ry="9"/></g>
+        <g class="arm arm-r"><ellipse class="fur ol" cx="228" cy="258" rx="25" ry="40" transform="rotate(-22 228 258)"/><ellipse class="inner" cx="238" cy="286" rx="11" ry="9"/></g>
         <!-- ears -->
         <g class="ears">
-          <circle class="fur ear-l" cx="76" cy="60" r="34"/>
-          <circle class="fur ear-r" cx="224" cy="60" r="34"/>
-          <circle class="inner" cx="76" cy="60" r="19"/>
-          <circle class="inner" cx="224" cy="60" r="19"/>
+          <circle class="fur ol ear-l" cx="70" cy="62" r="36"/>
+          <circle class="fur ol ear-r" cx="230" cy="62" r="36"/>
+          <circle class="inner" cx="70" cy="64" r="20"/>
+          <circle class="inner" cx="230" cy="64" r="20"/>
         </g>
         <!-- head -->
         <g class="head">
-          <circle class="fur" cx="150" cy="132" r="96"/>
-          <!-- tuft -->
-          <path class="fur" d="M138 42 Q144 22 152 38 Q158 20 164 42 Z"/>
-          <circle class="cheek" cx="92" cy="168" r="15"/>
-          <circle class="cheek" cx="208" cy="168" r="15"/>
-          <ellipse class="light" cx="150" cy="176" rx="54" ry="40"/>
+          <ellipse class="fur ol" cx="150" cy="132" rx="104" ry="96"/>
+          <path class="fur" d="M136 40 Q142 18 151 36 Q158 16 166 40 Z"/>
+          <ellipse class="cheek" cx="86" cy="164" rx="17" ry="12"/>
+          <ellipse class="cheek" cx="214" cy="164" rx="17" ry="12"/>
+          <ellipse class="light" cx="150" cy="176" rx="50" ry="38"/>
+          <path class="brow" d="M96 92 Q110 84 124 90"/>
+          <path class="brow" d="M176 90 Q190 84 204 92"/>
+          <ellipse class="patch" cx="108" cy="126" rx="25" ry="28" transform="rotate(-18 108 126)"/>
+          <ellipse class="patch" cx="192" cy="126" rx="25" ry="28" transform="rotate(18 192 126)"/>
           <g class="eyes-open">
-            <ellipse class="eye dark" cx="112" cy="126" rx="12" ry="15"/>
-            <ellipse class="eye dark" cx="188" cy="126" rx="12" ry="15"/>
-            <circle class="shine" cx="116" cy="120" r="4.5"/>
-            <circle class="shine" cx="192" cy="120" r="4.5"/>
+            <ellipse class="eye dark" cx="110" cy="124" rx="15" ry="19"/>
+            <ellipse class="eye dark" cx="190" cy="124" rx="15" ry="19"/>
+            <circle class="shine" cx="115" cy="116" r="6"/>
+            <circle class="shine" cx="195" cy="116" r="6"/>
+            <circle class="shine" cx="105" cy="132" r="2.8"/>
+            <circle class="shine" cx="185" cy="132" r="2.8"/>
           </g>
           <g class="eyes-closed">
-            <path d="M99 128 Q112 138 125 128" class="stroke"/>
-            <path d="M175 128 Q188 138 201 128" class="stroke"/>
+            <path d="M95 126 Q110 138 125 126" class="stroke"/>
+            <path d="M175 126 Q190 138 205 126" class="stroke"/>
           </g>
-          <ellipse class="dark" cx="150" cy="160" rx="19" ry="13"/>
-          <ellipse class="shine" cx="144" cy="155" rx="6" ry="3.5"/>
-          <path class="smile stroke" d="M126 182 Q150 204 174 182"/>
+          <path class="dark" d="M134 154 Q150 146 166 154 Q166 166 150 172 Q134 166 134 154 Z"/>
+          <ellipse class="shine" cx="144" cy="155" rx="5" ry="3"/>
+          <path class="smile stroke" d="M150 172 L150 180 M128 182 Q139 194 150 182 Q161 194 172 182"/>
           <g class="mouth-open">
-            <ellipse class="dark" cx="150" cy="190" rx="16" ry="13"/>
-            <ellipse class="tongue" cx="150" cy="197" rx="9" ry="5"/>
+            <path class="dark" d="M132 182 Q150 178 168 182 Q166 204 150 206 Q134 204 132 182 Z"/>
+            <ellipse class="tongue" cx="150" cy="198" rx="9" ry="5"/>
           </g>
         </g>
-        <!-- bow -->
-        <g class="bow">
-          <path class="red" d="M150 232 L116 214 L116 250 Z"/>
-          <path class="red" d="M150 232 L184 214 L184 250 Z"/>
-          <circle class="red-dark" cx="150" cy="232" r="10"/>
+        <!-- neck outfits -->
+        <g class="outfit outfit-bow">
+          <path class="bow-c" d="M150 230 L114 212 Q108 230 114 248 Z"/>
+          <path class="bow-c" d="M150 230 L186 212 Q192 230 186 248 Z"/>
+          <circle class="bow-dark" cx="150" cy="230" r="10"/>
+        </g>
+        <g class="outfit outfit-scarf">
+          <path class="scarf" d="M82 222 Q150 252 218 222 L222 238 Q150 270 78 238 Z"/>
+          <path class="scarf" d="M180 240 L196 296 L174 298 L166 246 Z"/>
+          <path class="scarf-stripe" d="M178 266 L194 264 M180 280 L196 278" stroke-width="5"/>
+        </g>
+        <!-- hats -->
+        <g class="hat hat-party">
+          <path class="hat-a" d="M150 -6 L120 52 Q150 62 180 52 Z"/>
+          <path class="hat-b" d="M138 18 L162 18 L168 32 L132 32 Z"/>
+          <circle class="hat-pom" cx="150" cy="-8" r="9"/>
+        </g>
+        <g class="hat hat-crown">
+          <path class="crown" d="M112 50 L116 16 L134 34 L150 8 L166 34 L184 16 L188 50 Q150 60 112 50 Z"/>
+          <circle class="gem" cx="150" cy="40" r="5"/><circle class="gem2" cx="128" cy="44" r="3.5"/><circle class="gem2" cx="172" cy="44" r="3.5"/>
+        </g>
+        <g class="hat hat-flower">
+          <g transform="translate(210 46)">
+            <circle class="petal" cx="0" cy="-13" r="10"/><circle class="petal" cx="12" cy="-4" r="10"/><circle class="petal" cx="8" cy="11" r="10"/>
+            <circle class="petal" cx="-8" cy="11" r="10"/><circle class="petal" cx="-12" cy="-4" r="10"/><circle class="flower-c" cx="0" cy="0" r="8"/>
+          </g>
         </g>
         <!-- paws for peekaboo -->
         <g class="paws">
-          <circle class="fur" cx="112" cy="126" r="30"/>
-          <circle class="fur" cx="188" cy="126" r="30"/>
-          <circle class="inner" cx="112" cy="132" r="13"/>
-          <circle class="inner" cx="188" cy="132" r="13"/>
+          <circle class="fur ol" cx="110" cy="124" r="32"/>
+          <circle class="fur ol" cx="190" cy="124" r="32"/>
+          <circle class="inner" cx="110" cy="130" r="14"/>
+          <circle class="inner" cx="190" cy="130" r="14"/>
         </g>
       </svg>
+      <div class="bee-buddy" aria-hidden="true">
+        <svg viewBox="0 0 60 50"><ellipse cx="22" cy="12" rx="11" ry="9" fill="#D7F1FF" opacity=".9"/><ellipse cx="36" cy="12" rx="11" ry="9" fill="#D7F1FF" opacity=".9"/>
+          <ellipse cx="30" cy="30" rx="20" ry="15" fill="#FFD23F"/><path d="M24 16 Q22 30 24 44 M34 15 Q32 30 34 45" stroke="#3B2210" stroke-width="5" fill="none"/>
+          <circle cx="44" cy="26" r="3" fill="#3B2210"/><path d="M42 33 Q46 36 49 32" stroke="#3B2210" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
       <div id="zzz" class="zzz">Z z z</div>
     </div>
     <div id="fx" class="fx"></div>
@@ -99,6 +154,8 @@
       <span class="mic-label">Talk</span>
     </button>
     <nav class="games" aria-label="Games">
+      <button data-game="sayit"><span>🗣️</span>Say It</button>
+      <button data-game="videos"><span>📺</span>Videos</button>
       <button data-game="quiz"><span>🎲</span>Surprise</button>
       <button data-game="math"><span>🧮</span>Math</button>
       <button data-game="words"><span>📖</span>Words</button>
@@ -128,6 +185,12 @@
   <button id="start" class="start">Tap to play! 🐻</button>
   <p class="tip">🔊 Turn the volume up.<br>iPhone: flip the side silent switch off (no orange showing).</p>
 </div>
+<div id="videoPlayer" class="video-player hidden">
+  <div class="video-frame"><iframe id="ytFrame" title="Video" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <div class="yt-shield top"></div><div class="yt-shield logo"></div></div>
+  <button id="videoClose" class="video-close" aria-label="Close video">✕</button>
+</div>
+<div id="unlockHint" class="unlock-hint hidden">Hold 🔓 for 3 seconds to unlock</div>
 <div id="soundTip" class="sound-tip hidden">🔇 No sound? Turn the volume up. iPhone: turn the silent switch off.</div>
 
 <dialog id="settings">
@@ -135,6 +198,23 @@
     <h2>Grown-up settings</h2>
     <label>Child's name
       <input id="setName" type="text" maxlength="20" placeholder="e.g. Mia" autocomplete="off">
+    </label>
+    <h3>🐻 Bumble's look</h3>
+    <label>Fur color
+      <select id="setFur">
+        <option value="honey">Honey</option><option value="chocolate">Chocolate</option><option value="cream">Cream</option>
+        <option value="pink">Pink</option><option value="blue">Blue</option><option value="purple">Purple</option><option value="panda">Panda</option>
+      </select>
+    </label>
+    <label>Outfit
+      <select id="setOutfit">
+        <option value="bow">Bow tie</option><option value="scarf">Scarf</option><option value="overalls">Overalls</option><option value="shirt">Striped shirt</option><option value="none">Nothing</option>
+      </select>
+    </label>
+    <label>Hat
+      <select id="setHat">
+        <option value="none">No hat</option><option value="party">Party hat</option><option value="crown">Crown</option><option value="flower">Flower</option>
+      </select>
     </label>
     <h3>📚 Learning</h3>
     <label>Age
@@ -169,6 +249,21 @@
     </div>
     <p class="note" id="micNote"></p>
 
+    <h3>📺 Videos</h3>
+    <p class="note">Only videos you add here show up. Paste YouTube or YouTube Kids links, one per line (use the Share → Copy link button).</p>
+    <label>Approved video links
+      <textarea id="setVideos" rows="4" placeholder="https://youtu.be/..." spellcheck="false"></textarea>
+    </label>
+    <label>Video time limit (minutes, 0 = no limit)
+      <input id="setVideoMin" type="number" min="0" max="240" step="5" inputmode="numeric">
+    </label>
+
+    <h3>🔒 Kid Lock</h3>
+    <p class="note">Tap 🔒 at the top to lock: Bumble goes full screen, the back button and grown-up buttons are blocked, and you hold 🔓 for 3 seconds to unlock.
+    For a lock that also blocks the home swipe:<br>
+    <b>iPhone:</b> Settings → Accessibility → Guided Access → turn on and set a passcode. Open Bumble, triple-click the side button, tap Start. Triple-click again to end.<br>
+    <b>Android:</b> Settings → Security → App pinning (or "Pin windows") → turn on. Open Bumble, open Recent apps, tap the Bumble icon → Pin. To unpin, hold Back + Overview (or swipe up and hold).</p>
+
     <h3>🎵 Spotify music</h3>
     <p class="note">Needs Spotify Premium. Songs marked explicit are always skipped.</p>
     <label>Spotify Client ID
@@ -181,15 +276,20 @@
     </div>
     <p class="note" id="spStatus"></p>
 
+    <details class="note"><summary>Credits</summary>
+      Natural voice: Piper (open source) via vits-web. Animal sounds: Wikimedia Commons contributors (public domain and Creative Commons licenses — full list in the project README on GitHub). Music Box: traditional public-domain nursery songs. Learning levels: Common Core math standards and Dolch sight words.
+    </details>
     <div class="btns">
       <button value="save" class="primary">Save</button>
     </div>
   </form>
 </dialog>
 
-<script src="learn.js?v=3"></script>
-<script src="spotify.js?v=3"></script>
-<script type="module" src="voice.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="learn.js?v=4"></script>
+<script src="animals.js?v=4"></script>
+<script src="songs.js?v=4"></script>
+<script src="spotify.js?v=4"></script>
+<script type="module" src="voice.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

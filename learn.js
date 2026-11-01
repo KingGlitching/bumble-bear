@@ -279,5 +279,28 @@ window.BumbleLearn = (() => {
     return new RegExp('\\b' + a.replace(/[^a-z']/g, '') + '\\b').test(t);
   }
 
-  return { LEVELS, levelForAge, numWord, parseNumber, parseMath, solve, mathQuestion, readingQuestion, matches, SPELLABLE, SOUNDS, esc };
+  /* Words for speech practice: [word, syllables, emoji, level]. Early words follow common first-words lists. */
+  const SAY = [
+    ['mama', 'ma-ma', '👩', 1], ['dada', 'da-da', '👨', 1], ['ball', 'ball', '⚽', 1], ['dog', 'dog', '🐶', 1], ['cat', 'cat', '🐱', 1],
+    ['cup', 'cup', '🥤', 1], ['milk', 'milk', '🥛', 1], ['more', 'more', '➕', 1], ['up', 'up', '⬆️', 1], ['bye bye', 'bye-bye', '👋', 1],
+    ['shoe', 'shoe', '👟', 1], ['car', 'car', '🚗', 1], ['duck', 'duck', '🦆', 1], ['baby', 'ba-by', '👶', 1], ['apple', 'ap-ple', '🍎', 1],
+    ['banana', 'ba-na-na', '🍌', 1], ['water', 'wa-ter', '💧', 1], ['bubbles', 'bub-bles', '🫧', 1], ['cookie', 'coo-kie', '🍪', 1],
+    ['book', 'book', '📖', 1], ['bath', 'bath', '🛁', 1], ['hat', 'hat', '🧢', 1], ['moon', 'moon', '🌙', 1], ['bear', 'bear', '🐻', 1],
+    ['fish', 'fish', '🐟', 1], ['bird', 'bird', '🐦', 1], ['eat', 'eat', '🍽️', 1], ['hi', 'hi', '👋', 1], ['no', 'no', '🙅', 1],
+    ['yes', 'yes', '👍', 1], ['nose', 'nose', '👃', 1], ['eyes', 'eyes', '👀', 1], ['juice', 'juice', '🧃', 1], ['cow', 'cow', '🐮', 1],
+    ['please', 'please', '🙏', 2], ['thank you', 'thank-you', '🙏', 2], ['bunny', 'bun-ny', '🐰', 2], ['puppy', 'pup-py', '🐶', 2],
+    ['kitty', 'kit-ty', '🐱', 2], ['flower', 'flow-er', '🌸', 2], ['tiger', 'ti-ger', '🐯', 2], ['monkey', 'mon-key', '🐵', 2],
+    ['teddy', 'ted-dy', '🧸', 2], ['blanket', 'blan-ket', '🛏️', 2], ['potty', 'pot-ty', '🚽', 2], ['outside', 'out-side', '🌳', 2],
+    ['tummy', 'tum-my', '😋', 2], ['shoes', 'shoes', '👟', 2], ['pizza', 'piz-za', '🍕', 2], ['turtle', 'tur-tle', '🐢', 2],
+    ['airplane', 'air-plane', '✈️', 2], ['rainbow', 'rain-bow', '🌈', 2], ['pumpkin', 'pump-kin', '🎃', 2], ['penguin', 'pen-guin', '🐧', 2],
+    ['butterfly', 'but-ter-fly', '🦋', 3], ['elephant', 'el-e-phant', '🐘', 3], ['dinosaur', 'di-no-saur', '🦕', 3], ['umbrella', 'um-brel-la', '☂️', 3],
+    ['strawberry', 'straw-ber-ry', '🍓', 3], ['spaghetti', 'spa-ghet-ti', '🍝', 3], ['octopus', 'oc-to-pus', '🐙', 3], ['kangaroo', 'kan-ga-roo', '🦘', 3],
+    ['giraffe', 'gi-raffe', '🦒', 3], ['broccoli', 'broc-co-li', '🥦', 3], ['tomato', 'to-ma-to', '🍅', 3], ['pajamas', 'pa-ja-mas', '👕', 3],
+    ['helicopter', 'hel-i-cop-ter', '🚁', 4], ['caterpillar', 'cat-er-pil-lar', '🐛', 4], ['watermelon', 'wa-ter-mel-on', '🍉', 4],
+    ['alligator', 'al-li-ga-tor', '🐊', 4], ['hippopotamus', 'hip-po-pot-a-mus', '🦛', 4], ['avocado', 'av-o-ca-do', '🥑', 4],
+    ['I love you', 'I-love-you', '❤️', 2], ['more please', 'more-please', '🙏', 2], ['I want milk', 'I-want-milk', '🥛', 3], ['help me please', 'help-me-please', '🙋', 3],
+  ];
+  function sayWordsFor(level) { return SAY.filter((w) => w[3] <= Math.max(1, Math.min(4, level))).map(([w, syl, e, l]) => ({ w, syl: syl.split('-'), e, l })); }
+
+  return { sayWordsFor, LEVELS, levelForAge, numWord, parseNumber, parseMath, solve, mathQuestion, readingQuestion, matches, SPELLABLE, SOUNDS, esc };
 })();

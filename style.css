@@ -212,3 +212,74 @@ dialog { max-height: 90dvh; }
 .card.quiz { width: min(92vw, 420px); left: 50%; transform: translateX(-50%); aspect-ratio: auto; min-height: 52%; animation: none; }
 .card .items span.gone { opacity: .25; text-decoration: line-through; filter: grayscale(1); }
 .card .q-html { width: 100%; display: flex; flex-direction: column; align-items: center; }
+/* ---- bear look (fur colors, outfits, hats) ---- */
+.bear { --fur: #C8792E; --fur-dark: #9C5A1E; --light: #F6D29A; --inner: #EFA968; --cloth: #3D8BEA; --cloth-dark: #2A63AE; }
+.bear[data-fur="chocolate"] { --fur: #7A4A2A; --fur-dark: #57331B; --light: #E3C29E; --inner: #B07A55; }
+.bear[data-fur="cream"] { --fur: #F3DDB8; --fur-dark: #CDB083; --light: #FFF6E6; --inner: #F2B6A0; }
+.bear[data-fur="pink"] { --fur: #F59AC0; --fur-dark: #D06F97; --light: #FFE0EC; --inner: #FF7BA9; }
+.bear[data-fur="blue"] { --fur: #7FB6F2; --fur-dark: #5389C6; --light: #E1F0FF; --inner: #A9C9FF; }
+.bear[data-fur="purple"] { --fur: #B48BE6; --fur-dark: #8B62BF; --light: #F0E6FF; --inner: #D9B5FF; }
+.bear[data-fur="panda"] { --fur: #F7F7F4; --fur-dark: #C9C9C2; --light: #FFFFFF; --inner: #333; }
+.bear[data-fur="panda"] .ears .fur, .bear[data-fur="panda"] .arm .fur, .bear[data-fur="panda"] .feet .fur { fill: #333; }
+.bear[data-fur="panda"] .eyes-open .eye { fill: #222; }
+.bear[data-fur="panda"] .eyes-open::before { content: none; }
+.bear .ol { stroke: var(--fur-dark); stroke-width: 3; }
+.bear .shadow { fill: rgba(0,0,0,.08); }
+.bear .belly-heart { fill: var(--inner); opacity: .55; }
+.bear .brow { stroke: var(--fur-dark); stroke-width: 4; fill: none; stroke-linecap: round; }
+.bear .outfit, .bear .hat { display: none; }
+.bear[data-outfit="bow"] .outfit-bow, .bear[data-outfit="scarf"] .outfit-scarf,
+.bear[data-outfit="overalls"] .outfit-overalls, .bear[data-outfit="shirt"] .outfit-shirt,
+.bear[data-hat="party"] .hat-party, .bear[data-hat="crown"] .hat-crown, .bear[data-hat="flower"] .hat-flower { display: inline; }
+.bear[data-outfit="overalls"] .outfit-bow { display: none; }
+.bear .bow-c { fill: #E8333A; } .bear .bow-dark { fill: #B8232A; }
+.bear .scarf { fill: #FF8A3D; } .bear .scarf-stripe { stroke: #FFE08A; fill: none; }
+.bear .cloth { fill: var(--cloth); } .bear .cloth-dark { stroke: var(--cloth-dark); fill: none; } .bear .cloth-dark-fill { fill: var(--cloth-dark); }
+.bear .button { fill: #FFD23F; }
+.bear .shirt { fill: #FFD23F; } .bear .shirt-stripe { fill: #FF8A3D; }
+.bear .shirt-letter { font: 900 22px "Trebuchet MS", sans-serif; fill: #fff; }
+.bear .hat-a { fill: #9B4DE0; } .bear .hat-b { fill: #FFD23F; } .bear .hat-pom { fill: #FF77B7; }
+.bear .crown { fill: #FFD23F; stroke: #E0A800; stroke-width: 3; } .bear .gem { fill: #E8333A; } .bear .gem2 { fill: #2E7CF6; }
+.bear .petal { fill: #FF9EC4; } .bear .flower-c { fill: #FFD23F; }
+.bear .smile.stroke { stroke-width: 5; }
+.bear .feet { }
+/* bee buddy */
+.bee-buddy { position: absolute; width: 16%; left: 4%; top: 6%; pointer-events: none; animation: beeFly 7s ease-in-out infinite; }
+.bee-buddy svg { width: 100%; animation: beeBob .35s ease-in-out infinite alternate; }
+@keyframes beeFly { 0% { transform: translate(0,0) scaleX(1); } 25% { transform: translate(60%, -40%) scaleX(1); } 50% { transform: translate(520%, -10%) scaleX(1); }
+  51% { transform: translate(520%, -10%) scaleX(-1); } 75% { transform: translate(300%, 30%) scaleX(-1); } 99% { transform: translate(0,0) scaleX(-1); } 100% { transform: translate(0,0) scaleX(1); } }
+@keyframes beeBob { from { transform: translateY(0); } to { transform: translateY(-8%); } }
+.bear-wrap.small .bee-buddy { display: none; }
+/* look picker in settings */
+.look-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.look-row button { width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent; font-size: 22px; background: #F1E4CC; }
+.look-row button.sel { border-color: var(--accent); }
+.bear .patch { display: none; fill: #333; }
+.bear[data-fur="panda"] .patch { display: inline; }
+.bear[data-fur="panda"] .eyes-open .eye { fill: #0d0d0d; stroke: #555; stroke-width: 2; }
+.card .sylls { font-size: 34px; font-weight: 900; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.card .sylls span { padding: 2px 8px; border-radius: 12px; opacity: .45; transition: all .2s; }
+.card .sylls span.on { opacity: 1; background: #FFE08A; transform: scale(1.12); }
+.card .sylls b { opacity: .4; }
+.card.scroll { overflow-y: auto; justify-content: flex-start; aspect-ratio: auto; max-height: 64%; }
+.card .lyric { font-size: 22px; font-weight: 800; min-height: 60px; margin: 8px 4px; text-align: center; }
+.gear.lock { opacity: .6; }
+body.locked .gear:not(.lock) { display: none; }
+body.locked .card-close { display: none !important; }
+body.locked a { pointer-events: none; opacity: .4; }
+.gear.lock.holding { opacity: 1; animation: spin 3s linear; }
+.unlock-hint { position: fixed; top: calc(52px + env(safe-area-inset-top)); right: 12px; background: #3B2210; color: #fff; padding: 8px 12px; border-radius: 12px; font-weight: 700; z-index: 9; font-size: 14px; }
+.unlock-hint.hidden { display: none; }
+.video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.video-grid button { padding: 0; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 16/9; position: relative; }
+.video-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.video-grid span { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.video-player { position: fixed; inset: 0; z-index: 20; background: #000; display: flex; align-items: center; justify-content: center; }
+.video-player.hidden { display: none; }
+.video-frame { position: relative; width: 100%; max-width: 100vw; aspect-ratio: 16/9; max-height: 100dvh; }
+.video-frame iframe { width: 100%; height: 100%; border: 0; }
+.yt-shield { position: absolute; background: transparent; }
+.yt-shield.top { left: 0; right: 0; top: 0; height: 18%; }
+.yt-shield.logo { right: 0; bottom: 0; width: 22%; height: 16%; }
+.video-close { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 10px; width: 52px; height: 52px; border-radius: 50%; background: #fff; font-size: 22px; font-weight: 900; z-index: 21; }
+.settings-form textarea { font: inherit; font-size: 14px; padding: 10px; border-radius: 12px; border: 2px solid #E6D3B0; resize: vertical; }

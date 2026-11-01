@@ -1,6 +1,6 @@
 // Offline support: keeps Bumble working without internet (hearing words and Spotify still need internet).
-const CACHE = 'bumble-v4';
-const FILES = ['./', 'index.html', 'style.css', 'app.js', 'spotify.js', 'learn.js', 'voice.js', 'manifest.json',
+const CACHE = 'bumble-v5';
+const FILES = ['./', 'index.html', 'style.css', 'app.js', 'spotify.js', 'learn.js', 'voice.js', 'animals.js', 'songs.js', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
