@@ -11,6 +11,7 @@ window.BumbleChat = (() => {
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} };
 
   let history = []; // this session's messages
+  let lastError = '';
   let lastAt = 0;
   let usedMsToday = 0, usedDay = '';
   try { const u = JSON.parse(localStorage.getItem('bumble-chat-used') || '{}'); usedMsToday = u.ms || 0; usedDay = u.day || ''; } catch (e) {}
@@ -65,20 +66,38 @@ Use at most one tag per reply.`;
     history.push({ role: 'user', content: String(childSaid).slice(0, 300) });
     history = history.slice(-16);
     if (history[0] && history[0].role !== 'user') history.shift();
-    let res;
-    try {
-      const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 15000);
-      res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST', signal: ctl.signal,
-        headers: {
-          'x-api-key': cfg.key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: MODEL, max_tokens: 160, temperature: 0.8, system: system(profile), messages: history }),
-      });
-      clearTimeout(tm);
-    } catch (e) { history.pop(); return { error: 'network' }; }
-    if (!res.ok) { history.pop(); return { error: res.status === 401 || res.status === 403 ? 'bad-key' : res.status === 429 ? 'busy' : res.status === 400 ? 'billing' : 'server' }; }
+    // Fast, short replies: thinking off, low effort. If the API ever rejects those options, retry plainly.
+    const base = { model: MODEL, system: system(profile), messages: history };
+    const bodies = [
+      { ...base, max_tokens: 300, thinking: { type: 'disabled' }, output_config: { effort: 'low' } },
+      { ...base, max_tokens: 1200 },
+    ];
+    let res = null;
+    for (const body of bodies) {
+      try {
+        const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 20000);
+        res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST', signal: ctl.signal,
+          headers: {
+            'x-api-key': cfg.key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify(body),
+        });
+        clearTimeout(tm);
+      } catch (e) { history.pop(); lastError = 'network: ' + e.message; return { error: 'network' }; }
+      if (res.ok || res.status !== 400) break;
+      const ej = await res.clone().json().catch(() => ({}));
+      lastError = (ej.error && ej.error.message) || 'bad request';
+      if (/credit|balance|billing/i.test(lastError)) break;
+    }
+    if (!res.ok) {
+      history.pop();
+      const ej = await res.json().catch(() => ({}));
+      lastError = (ej.error && ej.error.message) || ('HTTP ' + res.status);
+      return { error: res.status === 401 || res.status === 403 ? 'bad-key' : res.status === 429 ? 'busy' : /credit|balance|billing/i.test(lastError) ? 'billing' : 'server', detail: lastError };
+    }
+    lastError = '';
     const j = await res.json().catch(() => ({}));
     let text = ((j.content || []).filter((c) => c.type === 'text').map((c) => c.text).join(' ') || '').trim();
     let animal = null, emoji = null;
@@ -107,9 +126,9 @@ Use at most one tag per reply.`;
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: MODEL, max_tokens: 20, messages: [{ role: 'user', content: 'Say hi in 3 words.' }] }),
+        body: JSON.stringify({ model: MODEL, max_tokens: 300, thinking: { type: 'disabled' }, output_config: { effort: 'low' }, system: 'You are Bumble, a friendly bear. Reply in one short sentence.', messages: [{ role: 'user', content: 'Why is the sky blue?' }] }),
       });
-      if (r.ok) return 'ok';
+      if (r.ok) { const j = await r.json().catch(() => ({})); const t = ((j.content || []).find((c) => c.type === 'text') || {}).text || ''; return t ? 'ok: ' + t : 'ok'; }
       const j = await r.json().catch(() => ({}));
       const msg = (j.error && j.error.message) || '';
       if (r.status === 401) return 'The key was rejected (' + msg + '). Copy it again — make sure nothing is missing at the start or end.';
@@ -120,7 +139,7 @@ Use at most one tag per reply.`;
   }
 
   return {
-    ask, test, getLog, clearLog, minutesLeft,
+    ask, test, getLog, clearLog, minutesLeft, get lastError() { return lastError; },
     get enabled() { return !!(cfg.on && cfg.key); },
     get cfg() { return { ...cfg, key: cfg.key ? '••••' + cfg.key.slice(-4) : '' }; },
     setKey(k) { cfg.key = String(k || '').trim(); save(); },

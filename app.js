@@ -968,7 +968,7 @@
         return;
       }
       chatProblem = r.error;
-      const why = { 'no-key': 'no API key saved', 'bad-key': 'the API key was rejected', billing: 'the account needs credit (Billing)', busy: 'too many requests, try again soon', network: "couldn't reach Anthropic", server: 'Anthropic had an error' }[r.error];
+      const why = { 'no-key': 'no API key saved', 'bad-key': 'the API key was rejected', billing: 'the account needs credit (Billing)', busy: 'too many requests, try again soon', network: "couldn't reach Anthropic", server: 'Anthropic had an error (' + String(r.detail || '').slice(0, 90) + ')' }[r.error];
       if (why) { soundTip.textContent = '🧠 Real conversation is off: ' + why + '. Grown-ups: hold ⚙️ → Test key.'; showTip(); setTimeout(() => { soundTip.textContent = '🔇 No sound? Turn the volume up. iPhone: turn the silent switch off.'; }, 7500); }
       if (r.error === 'time-up') return say("Bumble had so much fun talking with you! Talking time is done for today. Want to play a game?");
       // otherwise fall back to Bumble's built-in answers below
@@ -1131,7 +1131,7 @@
     $('#micNote').textContent = diagnostics();
     $('#setAge').value = settings.age;
     if (window.BumbleChat) { const c = window.BumbleChat.cfg; $('#setChatOn').checked = c.on; $('#setChatKey').value = ''; $('#setChatKey').placeholder = c.key || 'sk-ant-...'; $('#setChatMin').value = c.minutes || 0;
-      $('#chatNote').textContent = c.key ? `Key saved (${c.key}). ${isFinite(window.BumbleChat.minutesLeft()) ? Math.round(window.BumbleChat.minutesLeft()) + ' talking minutes left today.' : ''}${chatProblem ? ' Last problem: ' + chatProblem + '.' : ''}` : 'No key yet — Bumble uses its built-in answers.'; }
+      $('#chatNote').textContent = c.key ? `Key saved (${c.key}). ${isFinite(window.BumbleChat.minutesLeft()) ? Math.round(window.BumbleChat.minutesLeft()) + ' talking minutes left today.' : ''}${chatProblem ? ' Last problem: ' + chatProblem + (window.BumbleChat.lastError ? ' (' + window.BumbleChat.lastError + ')' : '') + '.' : ''}` : 'No key yet — Bumble uses its built-in answers.'; }
     $('#setChallenge').value = String(settings.challenge || 0); $('#setAdaptive').checked = settings.adaptive !== false; $('#setKeepTalking').checked = settings.keepTalking !== false;
     $('#setVideos').value = (settings.videos || []).map((id) => 'https://youtu.be/' + id).join('\n'); $('#setVideoMin').value = settings.videoMin || 0;
     $('#setFur').value = settings.fur || 'honey'; $('#setOutfit').value = settings.outfit || 'bow'; $('#setHat').value = settings.hat || 'none';
@@ -1188,7 +1188,7 @@
     if (k) window.BumbleChat.setKey(k);
     $('#chatNote').textContent = 'Testing...';
     const r = await window.BumbleChat.test(k || '');
-    $('#chatNote').textContent = r === 'ok' ? '✅ It works! Bumble can have real conversations now.' : '❌ ' + r;
+    $('#chatNote').textContent = r.startsWith('ok') ? '✅ It works! Bumble can have real conversations now.' + (r.length > 4 ? ' Bumble says: "' + r.slice(4) + '"' : '') : '❌ ' + r;
   });
   $('#chatLogBtn').addEventListener('click', () => {
     const l = window.BumbleChat.getLog().slice(-60).reverse();
